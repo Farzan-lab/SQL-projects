@@ -1,227 +1,151 @@
-# Retail Sales Analysis SQL Project
+# Retail Sales Analysis – SQL Project
 
-## Project Overview
+## 📌 Project Overview
 
-**Project Title**: Retail Sales Analysis  
-**Level**: Beginner  
-**Database**: `p1_retail_db`
+**Project Title:** Retail Sales Analysis using SQL  
+**Role Target:** Data Analyst / Business Analyst (Entry–Junior Level)  
+**Database:** PostgreSQL  
+**Main Table:** `retail_sales`
 
-This project is designed to demonstrate SQL skills and techniques typically used by data analysts to explore, clean, and analyze retail sales data. The project involves setting up a retail sales database, performing exploratory data analysis (EDA), and answering specific business questions through SQL queries. This project is ideal for those who are starting their journey in data analysis and want to build a solid foundation in SQL.
+This project demonstrates my practical SQL skills by analysing a retail sales dataset end-to-end. The focus is on **data cleaning, exploratory data analysis (EDA), aggregation, window functions, and business-driven insights**, following patterns commonly expected in real-world analytics roles and technical interviews.
 
-## Objectives
+---
 
-1. **Set up a retail sales database**: Create and populate a retail sales database with the provided sales data.
-2. **Data Cleaning**: Identify and remove any records with missing or null values.
-3. **Exploratory Data Analysis (EDA)**: Perform basic exploratory data analysis to understand the dataset.
-4. **Business Analysis**: Use SQL to answer specific business questions and derive insights from the sales data.
+## 🎯 Project Objectives
 
-## Project Structure
+- Clean and prepare transactional retail data for analysis
+- Apply SQL techniques used in real analytics workflows
+- Answer business questions using aggregation and window functions
+- Demonstrate structured problem-solving and analytical thinking
 
-### 1. Database Setup
+---
 
-- **Database Creation**: The project starts by creating a database named `p1_retail_db`.
-- **Table Creation**: A table named `retail_sales` is created to store the sales data. The table structure includes columns for transaction ID, sale date, sale time, customer ID, gender, age, product category, quantity sold, price per unit, cost of goods sold (COGS), and total sale amount.
+## 🗂 Dataset Description
 
-```sql
-CREATE DATABASE p1_retail_db;
+The `retail_sales` table contains transactional-level retail data including:
 
-CREATE TABLE retail_sales
-(
-    transactions_id INT PRIMARY KEY,
-    sale_date DATE,	
-    sale_time TIME,
-    customer_id INT,	
-    gender VARCHAR(10),
-    age INT,
-    category VARCHAR(35),
-    quantity INT,
-    price_per_unit FLOAT,	
-    cogs FLOAT,
-    total_sale FLOAT
-);
-```
+- Transaction details (ID, date, time)
+- Customer information (ID, age, gender)
+- Product details (category, quantity, unit price)
+- Financial metrics (COGS, total sales value)
 
-### 2. Data Exploration & Cleaning
+---
 
-- **Record Count**: Determine the total number of records in the dataset.
-- **Customer Count**: Find out how many unique customers are in the dataset.
-- **Category Count**: Identify all unique product categories in the dataset.
-- **Null Value Check**: Check for any null values in the dataset and delete records with missing data.
+## 🧹 Data Cleaning
 
-```sql
-SELECT COUNT(*) FROM retail_sales;
-SELECT COUNT(DISTINCT customer_id) FROM retail_sales;
-SELECT DISTINCT category FROM retail_sales;
+Data quality checks were performed before analysis. Records with missing critical values were removed to ensure accuracy and reliability.
 
-SELECT * FROM retail_sales
-WHERE 
-    sale_date IS NULL OR sale_time IS NULL OR customer_id IS NULL OR 
-    gender IS NULL OR age IS NULL OR category IS NULL OR 
-    quantity IS NULL OR price_per_unit IS NULL OR cogs IS NULL;
+**Cleaning logic applied:**
+- Removed rows with `NULL` values in transaction, customer, date, pricing, or sales columns
+- Ensured only complete transactions were used in analysis
 
-DELETE FROM retail_sales
-WHERE 
-    sale_date IS NULL OR sale_time IS NULL OR customer_id IS NULL OR 
-    gender IS NULL OR age IS NULL OR category IS NULL OR 
-    quantity IS NULL OR price_per_unit IS NULL OR cogs IS NULL;
-```
+This reflects real-world scenarios where analysts must validate and clean raw datasets before deriving insights.
 
-### 3. Data Analysis & Findings
+---
 
-The following SQL queries were developed to answer specific business questions:
+## 🔍 Exploratory Data Analysis (EDA)
 
-1. **Write a SQL query to retrieve all columns for sales made on '2022-11-05**:
-```sql
-SELECT *
-FROM retail_sales
-WHERE sale_date = '2022-11-05';
-```
+Initial exploration focused on understanding dataset structure and scale:
 
-2. **Write a SQL query to retrieve all transactions where the category is 'Clothing' and the quantity sold is more than 4 in the month of Nov-2022**:
-```sql
-SELECT 
-  *
-FROM retail_sales
-WHERE 
-    category = 'Clothing'
-    AND 
-    TO_CHAR(sale_date, 'YYYY-MM') = '2022-11'
-    AND
-    quantity >= 4
-```
+- Total number of transactions
+- Total number of sales records
+- Number of unique customers
 
-3. **Write a SQL query to calculate the total sales (total_sale) for each category.**:
-```sql
-SELECT 
-    category,
-    SUM(total_sale) as net_sale,
-    COUNT(*) as total_orders
-FROM retail_sales
-GROUP BY 1
-```
+These checks help validate data consistency and provide context for deeper analysis.
 
-4. **Write a SQL query to find the average age of customers who purchased items from the 'Beauty' category.**:
-```sql
-SELECT
-    ROUND(AVG(age), 2) as avg_age
-FROM retail_sales
-WHERE category = 'Beauty'
-```
+---
 
-5. **Write a SQL query to find all transactions where the total_sale is greater than 1000.**:
-```sql
-SELECT * FROM retail_sales
-WHERE total_sale > 1000
-```
+## 📊 Business Analysis & SQL Queries
 
-6. **Write a SQL query to find the total number of transactions (transaction_id) made by each gender in each category.**:
-```sql
-SELECT 
-    category,
-    gender,
-    COUNT(*) as total_trans
-FROM retail_sales
-GROUP 
-    BY 
-    category,
-    gender
-ORDER BY 1
-```
+The following business questions were answered using SQL:
 
-7. **Write a SQL query to calculate the average sale for each month. Find out best selling month in each year**:
-```sql
-SELECT 
-       year,
-       month,
-    avg_sale
-FROM 
-(    
-SELECT 
-    EXTRACT(YEAR FROM sale_date) as year,
-    EXTRACT(MONTH FROM sale_date) as month,
-    AVG(total_sale) as avg_sale,
-    RANK() OVER(PARTITION BY EXTRACT(YEAR FROM sale_date) ORDER BY AVG(total_sale) DESC) as rank
-FROM retail_sales
-GROUP BY 1, 2
-) as t1
-WHERE rank = 1
-```
+### 1️⃣ Daily Sales Analysis
+- Calculated total sales for a specific date
+- Applied currency formatting for reporting
 
-8. **Write a SQL query to find the top 5 customers based on the highest total sales **:
-```sql
-SELECT 
-    customer_id,
-    SUM(total_sale) as total_sales
-FROM retail_sales
-GROUP BY 1
-ORDER BY 2 DESC
-LIMIT 5
-```
+### 2️⃣ Category-Specific Transactions
+- Identified high-quantity Clothing transactions during November 2022
 
-9. **Write a SQL query to find the number of unique customers who purchased items from each category.**:
-```sql
-SELECT 
-    category,    
-    COUNT(DISTINCT customer_id) as cnt_unique_cs
-FROM retail_sales
-GROUP BY category
-```
+### 3️⃣ Category Performance
+- Calculated total sales volume per category
+- Ranked categories by transaction count
 
-10. **Write a SQL query to create each shift and number of orders (Example Morning <12, Afternoon Between 12 & 17, Evening >17)**:
-```sql
-WITH hourly_sale
-AS
-(
-SELECT *,
-    CASE
-        WHEN EXTRACT(HOUR FROM sale_time) < 12 THEN 'Morning'
-        WHEN EXTRACT(HOUR FROM sale_time) BETWEEN 12 AND 17 THEN 'Afternoon'
-        ELSE 'Evening'
-    END as shift
-FROM retail_sales
-)
-SELECT 
-    shift,
-    COUNT(*) as total_orders    
-FROM hourly_sale
-GROUP BY shift
-```
+### 4️⃣ Customer Demographics
+- Computed the average age of customers purchasing from the Beauty category
 
-## Findings
+### 5️⃣ High-Value Transactions
+- Identified transactions with total sales greater than $1,000
 
-- **Customer Demographics**: The dataset includes customers from various age groups, with sales distributed across different categories such as Clothing and Beauty.
-- **High-Value Transactions**: Several transactions had a total sale amount greater than 1000, indicating premium purchases.
-- **Sales Trends**: Monthly analysis shows variations in sales, helping identify peak seasons.
-- **Customer Insights**: The analysis identifies the top-spending customers and the most popular product categories.
+### 6️⃣ Gender & Category Distribution
+- Analysed transaction counts by gender across product categories
 
-## Reports
+### 7️⃣ Monthly & Seasonal Sales Analysis
+- Calculated average and total sales per month
+- Used **window functions (RANK)** to identify the best-selling month in each year
 
-- **Sales Summary**: A detailed report summarizing total sales, customer demographics, and category performance.
-- **Trend Analysis**: Insights into sales trends across different months and shifts.
-- **Customer Insights**: Reports on top customers and unique customer counts per category.
+### 8️⃣ Top Customers Analysis
+- Identified the top 5 customers based on total sales value
 
-## Conclusion
+### 9️⃣ Cross-Category Buyers
+- Found customers purchasing across multiple product categories
 
-This project serves as a comprehensive introduction to SQL for data analysts, covering database setup, data cleaning, exploratory data analysis, and business-driven SQL queries. The findings from this project can help drive business decisions by understanding sales patterns, customer behavior, and product performance.
+### 🔟 Sales by Time of Day
+- Classified transactions into Morning, Afternoon, and Evening shifts
+- Analysed order volume by shift
 
-## How to Use
+### ➕ Additional Insight
+- Identified customers whose total lifetime spending exceeded $500
 
-1. **Clone the Repository**: Clone this project repository from GitHub.
-2. **Set Up the Database**: Run the SQL scripts provided in the `database_setup.sql` file to create and populate the database.
-3. **Run the Queries**: Use the SQL queries provided in the `analysis_queries.sql` file to perform your analysis.
-4. **Explore and Modify**: Feel free to modify the queries to explore different aspects of the dataset or answer additional business questions.
+---
 
-## Author - Zero Analyst
+## 🛠 SQL Skills Demonstrated
 
-This project is part of my portfolio, showcasing the SQL skills essential for data analyst roles. If you have any questions, feedback, or would like to collaborate, feel free to get in touch!
+- `GROUP BY`, `HAVING`, `ORDER BY`
+- Aggregate functions: `SUM`, `AVG`, `COUNT`
+- Window functions: `RANK() OVER (PARTITION BY …)`
+- Common Table Expressions (CTEs)
+- Date & time functions
+- Conditional logic with `CASE WHEN`
+- Data cleaning with `DELETE` and `NULL` checks
 
-### Stay Updated and Join the Community
+---
 
-For more content on SQL, data analysis, and other data-related topics, make sure to follow me on social media and join our community:
+## 📈 Key Findings
 
-- **YouTube**: [Subscribe to my channel for tutorials and insights](https://www.youtube.com/@zero_analyst)
-- **Instagram**: [Follow me for daily tips and updates](https://www.instagram.com/zero_analyst/)
-- **LinkedIn**: [Connect with me professionally](https://www.linkedin.com/in/najirr)
-- **Discord**: [Join our community to learn and grow together](https://discord.gg/36h5f2Z5PK)
+- Sales performance varies significantly across months, indicating seasonality
+- A small group of customers contributes a large share of total revenue
+- Certain product categories consistently outperform others
+- Evening hours show higher order volumes, suggesting peak shopping periods
 
-Thank you for your support, and I look forward to connecting with you!
+---
+
+## 📁 How to Use This Project
+
+1. Clone the repository
+2. Create the `retail_sales` table in PostgreSQL
+3. Load the dataset
+4. Run the SQL scripts in sequence:
+   - Data Cleaning
+   - Exploratory Data Analysis
+   - Business Analysis Queries
+
+---
+
+## 👤 Author
+
+**Farzan Momayezi**  
+Master’s Student – Data Science  
+Aspiring Data Analyst / Business Analyst
+
+This project is part of my professional portfolio and demonstrates my ability to apply SQL to real business problems. Feedback and collaboration are always welcome.
+
+---
+
+## 🚀 Why This Project Matters for Interviews
+
+- Mirrors real analytics tasks, not just academic queries
+- Demonstrates clean, structured SQL practices
+- Shows ability to translate business questions into data insights
+- Highlights readiness for entry-level data analyst roles
+
+⭐ *If you find this project useful, feel free to star the repository.*
